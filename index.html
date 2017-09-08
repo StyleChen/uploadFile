@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin-top: 250px;
+            text-align: center;
+        }
+    </style>
+    <title>
+        演示 - Web Uploader
+    </title>
+
+    <!--CSS-->
+    <!--<link rel="stylesheet" type="text/css" href="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.css">-->
+    <link rel="stylesheet" type="text/css" href="css/webuploader.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <script src="http://libs.baidu.com/jquery/1.7.0/jquery.min.js"></script>
+    <script src="javascript/webuploader.js"></script>
+
+    <!--javascript-->
+
+
+    <!--<script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.custom.js"></script>-->
+    <!--<script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.custom.min.js"></script>-->
+    <!--<script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.flashonly.js"></script>-->
+    <!--<script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.flashonly.min.js"></script>-->
+    <!--<script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.html5only.js"></script>-->
+    <!--<script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.html5only.min.js"></script>-->
+    <!--<script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.js"></script>-->
+    <!--<script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.min.js"></script>-->
+    <!--<script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.noimage.js"></script>-->
+    <!--<script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.noimage.min.js"></script>-->
+    <!--<script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.nolog.js"></script>-->
+    <!--<script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.nolog.min.js"></script>-->
+    <!--<script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.withoutimage.js"></script>-->
+    <!--<script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.withoutimage.min.js"></script>-->
+
+
+</head>
+<body>
+
+<div id="uploader">
+    <!--用来存放item-->
+    <div id="thelist" class="queueList">
+        <div id="filePicker">选择文件</div>
+    </div>
+
+    <!--<button id="ctlBtn" class="btn btn-default">开始上传</button>-->
+    <div class="statusBar" style="display:inline-block;">
+        <div class="progress">
+            <span class="text">0%</span>
+            <span class="percentage"></span>
+        </div>
+        <div class="info"></div>
+
+    </div>
+    <br>
+    <div>
+        <a id="link" href="#">点击即可访问</a>
+        <br>
+        <h2 id="link_url">上传后这里会变成链接</h2>
+    </div>
+
+</div>
+
+
+<script type="text/javascript">
+    $(function () {
+        /*init webuploader*/
+        var $list = $("#thelist");   //这几个初始化全局的百度文档上没说明，好蛋疼。
+        var $btn = $("#ctlBtn");   //开始上传
+        var thumbnailWidth = 100;   //缩略图高度和宽度 （单位是像素），当宽高度是0~1的时候，是按照百分比计算，具体可以看api文档
+        var thumbnailHeight = 100;
+
+        var uploader = WebUploader.create({
+            // 选完文件后，是否自动上传。
+            auto: true,
+
+            // swf文件路径
+            swf: "http://cdn.staticfile.org/webuploader/0.1.5/Uploader.swf",
+
+            // 文件接收服务端。
+            server: 'http://papermaker.cn:8080/papermaker/servlet/UploadServlet',
+
+            // 选择文件的按钮。可选。
+            // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+            pick: '#filePicker',
+
+            // 提交文件方式POST
+            method: 'POST',
+
+            // 不压缩image, 默认如果是jpeg，文件上传前会压缩后上传！
+            resize: false,
+
+            // 配置图片压缩选项
+            compress: false,
+
+            // 验证文件总数量, 超出则不允许加入队列。
+            fileNumLimit: 99999
+
+        });
+        // 当有文件添加进来的时候
+        uploader.on('fileQueued', function (file) {  // webuploader事件.当选择文件后，文件被加载到文件队列中，触发该事件。等效于 uploader.onFileueued = function(file){...} ，类似js的事件定义。
+            var $li = $(
+                            '<div id="' + file.id + '" class="file-item thumbnail">' +
+                            '<img>' +
+                            '<div class="info">' + file.name + '</div>' +
+                            '</div>'
+                    ),
+                    $img = $li.find('img');
+
+
+            // $list为容器jQuery实例
+            $list.append($li);
+
+            // 创建缩略图
+            // 如果为非图片文件，可以不用调用此方法。
+            // thumbnailWidth x thumbnailHeight 为 100 x 100
+//            uploader.makeThumb(file, function (error, src) {   //webuploader方法
+//                if (error) {
+//                    $img.replaceWith('<span>不能预览</span>');
+//                    return;
+//                }
+//
+//                $img.attr('src', src);
+//            }, thumbnailWidth, thumbnailHeight);
+        });
+        // 文件上传过程中创建进度条实时显示。
+        uploader.on('uploadProgress', function (file, percentage) {
+            var $li = $('#' + file.id),
+                    $percent = $li.find('.progress span');
+
+            // 避免重复创建
+            if (!$percent.length) {
+                $percent = $('<p class="progress"><span></span></p>')
+                        .appendTo($li)
+                        .find('span');
+            }
+
+            $percent.css('width', percentage * 100 + '%');
+            var per = (percentage * 100).toFixed(2) + '%';
+//            console.log(per);
+            $('.text').html(per);
+            $('.percentage').css('width', percentage * 100 + '%');
+        });
+
+
+        // 文件上传成功，给item添加成功class, 用样式标记上传成功。
+        uploader.on('uploadSuccess', function (file, response) {
+            console.log(response._raw);
+            var linker = document.getElementById("link");
+            var link_urler = document.getElementById("link_url");
+            linker.setAttribute("href", response._raw);
+            link_urler.innerHTML = response._raw;
+            $('#' + file.id).addClass('upload-state-done');
+            setTimeout(function () {
+                $('.text').html("上传成功");
+            }, 800);
+
+        });
+
+        // 文件上传失败，显示上传出错。
+        uploader.on('uploadError', function (file) {
+            var $li = $('#' + file.id),
+                    $error = $li.find('div.error');
+
+            // 避免重复创建
+            if (!$error.length) {
+                $error = $('<div class="error"></div>').appendTo($li);
+            }
+
+            $error.text('上传失败');
+        });
+
+        // 完成上传完了，成功或者失败，先删除进度条。
+        uploader.on('uploadComplete', function (file) {
+            $('#' + file.id).find('.progress').remove();
+        });
+
+//        $btn.on('click', function () {
+//            console.log("上传...");
+//            uploader.upload();
+//            console.log("上传成功");
+//        });
+    });
+</script>
+</body>
+</html>
